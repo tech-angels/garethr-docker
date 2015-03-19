@@ -50,13 +50,17 @@ class docker::service (
       $hasstatus     = true
       $hasrestart    = false
 
-      file { '/etc/init.d/docker':
-          ensure => 'link',
-          target => '/lib/init/upstart-job',
-          force  => true,
-          notify => Service['docker'],
+      case $::operatingsystem {
+        'Ubuntu' : {
+          file { '/etc/init.d/docker':
+            ensure => 'link',
+            target => '/lib/init/upstart-job',
+            force  => true,
+            notify => Service['docker'],
+          }
+        }
       }
-
+ 
       file { "/etc/default/${service_name}":
         ensure  => present,
         force   => true,
