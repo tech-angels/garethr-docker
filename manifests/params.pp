@@ -43,6 +43,9 @@ class docker::params {
           $package_name   = $package_name_default
           $service_name   = $service_name_default
           $docker_command = $docker_command_default
+          if $lsbdistcodename == 'jessie' {
+            include docker::systemd_reload
+          }
         }
         default: {
           $package_name   = 'docker.io'
@@ -53,7 +56,10 @@ class docker::params {
       $docker_group = $docker_group_default
       $package_source_location     = 'https://get.docker.com/ubuntu'
       $use_upstream_package_source = true
-      $detach_service_in_init = true
+      $detach_service_in_init = $lsbdistcodename ? {
+        'jessie' => false,
+        default  => true,
+      }
       $repo_opt = undef
       $nowarn_kernel = false
     }

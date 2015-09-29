@@ -153,15 +153,25 @@ define docker::run(
       path        => ['/bin', '/usr/bin'],
     }
   } else {
-
     case $::osfamily {
       'Debian': {
-        $initscript = "/etc/init.d/${service_prefix}${sanitised_title}"
-        $init_template = 'docker/etc/init.d/docker-run.erb'
-        $deprecated_initscript = "/etc/init/${service_prefix}${sanitised_title}.conf"
-        $hasstatus  = true
-        $uses_systemd = false
-        $mode = '0755'
+        case $lsbdistcodename {
+          'jessie': {
+            $initscript     = "/etc/systemd/system/${service_prefix}${sanitised_title}.service"
+            $init_template  = 'docker/etc/systemd/system/docker-run.erb'
+            $hasstatus      = true
+            $mode           = '0644'
+            $uses_systemd   = true 
+          }
+          default: {
+            $initscript = "/etc/init.d/${service_prefix}${sanitised_title}"
+            $init_template = 'docker/etc/init.d/docker-run.erb'
+            $deprecated_initscript = "/etc/init/${service_prefix}${sanitised_title}.conf"
+            $hasstatus  = true
+            $uses_systemd = false
+            $mode = '0755'
+          }
+        }
       }
       'RedHat': {
         if ($::operatingsystem == 'Amazon') or (versioncmp($::operatingsystemrelease, '7.0') < 0) {
